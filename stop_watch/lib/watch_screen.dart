@@ -1,7 +1,10 @@
 import 'dart:async';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:stop_watch/common_widgets/buttons.dart';
+import 'package:stop_watch/common_widgets/play_pause_button.dart';
 
 class WatchScreen extends StatefulWidget {
   const WatchScreen({super.key});
@@ -36,6 +39,9 @@ class _WatchScreenState extends State<WatchScreen> {
       digitalseconds = "00";
       digitalminute = "00";
       digitalhour = "00";
+
+      Laps.clear();
+      started = false;
     });
   }
 
@@ -88,9 +94,9 @@ class _WatchScreenState extends State<WatchScreen> {
           ),
           title: Row(
             children: [
+              SizedBox(width: 10),
               Text(
                 "Stop Watch",
-                textAlign: TextAlign.left,
                 style:
                     TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
               ),
@@ -101,121 +107,106 @@ class _WatchScreenState extends State<WatchScreen> {
         body: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // SizedBox(
-            //   height: 210,
-            // ),
-
+            SizedBox(
+              height: 105,
+            ),
             Container(
-              width: 250,
-              height: 200,
-              //color: Colors.amber,
+              width: 285,
+              height: 265,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
               ),
-              child: Column(
+              child: Stack(
+                alignment: Alignment.center,
                 children: [
                   SizedBox(
-                    height: 100,
+                    height: 500,
+                    width: 330,
+                    child: CircularProgressIndicator(
+                      value: seconds / 60,
+                      strokeWidth:
+                          18, // adjust the thickness of the progress indicator
+                      valueColor: const AlwaysStoppedAnimation<Color>(
+                        Color.fromARGB(255, 205, 188, 252),
+                      ),
+                      backgroundColor: Colors.grey,
+                    ),
                   ),
-                  Center(
-                    child: Text(
-                      '$digitalhour:$digitalminute:$digitalseconds',
-                      style: const TextStyle(
+                  Column(
+                    children: [
+                      SizedBox(
+                        height: 100,
+                      ),
+                      Text(
+                        '$digitalhour:$digitalminute:$digitalseconds',
+                        style: TextStyle(
                           fontSize: 50,
                           fontWeight: FontWeight.bold,
-                          color: Colors.grey),
-                    ),
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
             ),
             SizedBox(
-              height: 30,
-            ),
-            SizedBox(
-              height: 15,
-            ),
-            SizedBox(
-              height: 30,
+              height: 55,
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
+                CustomButton(
+                  onPressed: () {
+                    addLaps();
+                  },
+                  icon: Icon(Icons.flag),
+                  width: 125,
+                  label: "Lap",
+                ),
                 SizedBox(
-                  width: 130,
-                  child: ElevatedButton.icon(
-                    // color: Color.fromARGB(255, 205, 188, 252),
-                    onPressed: () {
-                      (!started) ? startTimer() : stopTimer();
+                    height: 60,
+                    width: 87,
+                    child: PlayPauseButton(50, () {
+                      (!started ? startTimer() : stopTimer());
                     },
-                    label: Text(
-                      (!started) ? "Start" : "Stop",
-                    ),
-                    icon: Icon(!(started) ? Icons.play_arrow : Icons.pause),
-                  ),
+                        Icon(
+                          !started ? Icons.play_arrow : Icons.pause,
+                          size: 35,
+                        ))),
+                CustomButton(
+                  onPressed: () {
+                    resetTimer();
+                  },
+                  icon: Icon(Icons.replay),
+                  width: 125,
+                  label: "Reset",
                 ),
-                SizedBox(
-                  height: 5,
-                ),
-                SizedBox(
-                  width: 130,
-                  child: ElevatedButton.icon(
-                    onPressed: () {
-                      resetTimer();
-                    },
-                    icon: Icon(Icons.replay_outlined),
-                    label: Text("Reset"),
-                  ),
-                ),
-                SizedBox(
-                  height: 5,
-                ),
-              ],
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            Row(
-              children: [
-                SizedBox(
-                  width: 36,
-                ),
-                SizedBox(
-                    width: 100,
-                    child: ElevatedButton.icon(
-                        onPressed: () {
-                          addLaps();
-                        },
-                        icon: Icon(Icons.flag_circle),
-                        label: Text("Lap"))),
               ],
             ),
             Expanded(
-              child: ListView(
-                children: [
-                  ...Laps.map((e) => Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Row(
-                          // mainAxisAlignment: MainAxisAlignment.start,
-
-                          children: [
-                            SizedBox(
-                              width: 25,
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(8),
-                              child: Text(
-                                "Lap : $e",
-                                style: TextStyle(
-                                    fontSize: 22,
-                                    color: Colors.grey,
-                                    fontWeight: FontWeight.w700),
-                              ),
-                            ),
-                          ],
+              child: ListView.builder(
+                itemCount: Laps.length,
+                itemBuilder: (context, index) {
+                  return Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      children: [
+                        SizedBox(
+                          width: 25,
                         ),
-                      )),
-                ],
+                        Text(
+                          "Lap : ${Laps[index]}",
+                          style: TextStyle(
+                            fontSize: 22,
+                            color: Colors.grey,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
               ),
             ),
           ],
